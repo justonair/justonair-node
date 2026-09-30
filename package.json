@@ -1,0 +1,68 @@
+{
+  "name": "justonair",
+  "version": "0.1.0",
+  "description": "Official Node.js and TypeScript SDK for the JustOnAir live video API",
+  "license": "MIT",
+  "author": "JustOnAir <hello@justonair.com>",
+  "homepage": "https://docs.justonair.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justonair/justonair-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/justonair/justonair-node/issues"
+  },
+  "keywords": [
+    "justonair",
+    "live",
+    "streaming",
+    "video",
+    "hls",
+    "rtmp",
+    "whip",
+    "webrtc",
+    "api",
+    "sdk"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "generate": "openapi-typescript ${OPENAPI_URL:-https://docs.justonair.com/openapi.json} -o src/generated/openapi.ts",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "openapi-typescript": "^7.13.0",
+    "tsup": "^8.5.1",
+    "typescript": "5.9",
+    "vitest": "^3.2.7"
+  }
+}
