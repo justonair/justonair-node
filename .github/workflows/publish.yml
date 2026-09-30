@@ -4,9 +4,11 @@ on:
   push:
     tags: ['v*']
 
+# No npm token: npm trusts this workflow directly (Trusted Publisher on
+# npmjs.com: org justonair, repo justonair-node, workflow publish.yml).
 permissions:
   contents: read
-  id-token: write # npm provenance, and trusted publishing once it is set up on npmjs.com
+  id-token: write
 
 jobs:
   publish:
@@ -17,11 +19,9 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: npm install -g npm@latest
+      - run: npm install -g npm@latest # trusted publishing needs npm 11.5.1+
       - name: Tag matches package.json
         run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
       - run: npm ci
       - run: npm run typecheck && npm test && npm run build
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish --access public
