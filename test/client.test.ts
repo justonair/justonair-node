@@ -23,7 +23,7 @@ describe('streams.create', () => {
     const { fetch, calls } = mockFetch(json(201, created));
     const joa = new JustOnAir({ apiKey: KEY, fetch });
 
-    const s = await joa.streams.create({ name: 'Town hall', record: false, player: { max_height: 720 } });
+    const s = await joa.streams.create({ name: 'Town hall', record: false, metadata: { class_id: 'c_42', n: 1 }, player: { max_height: 720 } });
 
     expect(s.stream_key).toBe('str_e1bzk3dxw9z9allei6n7?key=s3cret');
     expect(calls).toHaveLength(1);
@@ -34,7 +34,7 @@ describe('streams.create', () => {
     expect(c.headers['content-type']).toBe('application/json');
     expect(c.headers['user-agent']).toBe(`justonair-node/${VERSION}`);
     expect(c.headers['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
-    expect(c.body).toEqual({ name: 'Town hall', record: false, player: { max_height: 720 } });
+    expect(c.body).toEqual({ name: 'Town hall', record: false, metadata: { class_id: 'c_42', n: 1 }, player: { max_height: 720 } });
   });
 
   it('retries a 503 no_capacity with the SAME Idempotency-Key', async () => {
@@ -170,7 +170,7 @@ describe('streams', () => {
       json(200, { object: 'viewer_series' }),
     );
     const joa = new JustOnAir({ apiKey: KEY, fetch });
-    await joa.streams.update('str_a', { player: { watch_minutes_limit: 600 } });
+    await joa.streams.update('str_a', { player: { watch_minutes_limit: 600 }, metadata: { k: 'v' } });
     await joa.streams.end('str_a');
     await joa.streams.replaceKey('str_a');
     await joa.streams.playbackToken('str_a', { expires_in: 300 });
@@ -182,7 +182,7 @@ describe('streams', () => {
       'POST /v1/streams/str_a/playback-token',
       'GET /v1/streams/str_a/viewers',
     ]);
-    expect(calls[0]!.body).toEqual({ player: { watch_minutes_limit: 600 } });
+    expect(calls[0]!.body).toEqual({ player: { watch_minutes_limit: 600 }, metadata: { k: 'v' } });
     expect(calls[3]!.body).toEqual({ expires_in: 300 });
   });
 

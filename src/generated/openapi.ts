@@ -990,7 +990,9 @@ export interface components {
                 /** @description For people. May change. */
                 message: string;
                 /** @description Extra facts, e.g. `limit` and `current` on a 429. */
-                details?: Record<string, never>;
+                details?: {
+                    [key: string]: unknown;
+                };
             };
         };
         /** @description How the hosted player presents the stream. On PATCH, a field left out is unchanged and null clears it. */
@@ -1253,7 +1255,9 @@ export interface components {
                 id?: string;
                 name?: string | null;
                 status?: string;
-                metadata?: Record<string, never> | null;
+                metadata?: {
+                    [key: string]: unknown;
+                } | null;
                 /** Format: date-time */
                 created_at?: string;
                 /** Format: date-time */
@@ -1386,7 +1390,9 @@ export interface components {
             /** @description The stream ends after this long live. 4 h for new accounts, 24 h for trusted ones. */
             max_duration_seconds: number;
             /** @description Your own JSON, up to 2 KB. Never shown to viewers. */
-            metadata: Record<string, never> | null;
+            metadata: {
+                [key: string]: unknown;
+            } | null;
             player: components["schemas"]["PlayerSettings"];
             /**
              * Format: date-time
@@ -1444,14 +1450,18 @@ export interface components {
             /** @description Days to keep the MP4, 1–3650. Omit for the account default (30). Null: keep until deleted. */
             recording_retention_days?: number | null;
             /** @description Your own JSON, up to 2 KB. */
-            metadata?: Record<string, never>;
+            metadata?: {
+                [key: string]: unknown;
+            };
             player?: components["schemas"]["PlayerSettings"];
         };
         /** @description Only these fields can change, in any status. Null clears a field; `metadata` is replaced whole. */
         UpdateStreamRequest: {
             /** @description Up to 100 characters. */
             name?: string | null;
-            metadata?: Record<string, never> | null;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
             player?: components["schemas"]["PlayerSettings"];
         };
         PlaybackToken: {
