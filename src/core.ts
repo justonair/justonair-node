@@ -39,7 +39,7 @@ export interface RequestOptions {
   headers?: Record<string, string>;
 }
 
-type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 type QueryValue = string | number | boolean | null | undefined;
 
 export interface RequestSpec {
@@ -105,7 +105,7 @@ export class Core {
     if (opts.idempotencyKey !== undefined) headers['Idempotency-Key'] = opts.idempotencyKey;
     const body = spec.body !== undefined ? JSON.stringify(spec.body) : undefined;
 
-    // Repeating a GET, PATCH or DELETE changes nothing; a POST only when an
+    // Repeating a GET, PUT, PATCH or DELETE changes nothing; a POST only when an
     // Idempotency-Key makes the API return the first answer again.
     const safe = spec.method !== 'POST' || spec.retrySafe === true || opts.idempotencyKey !== undefined;
     const maxRetries = safe ? (opts.maxRetries ?? this.maxRetries) : 0;

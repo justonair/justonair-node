@@ -49,9 +49,9 @@ export class APIError extends JustOnAirError {
   }
 }
 
-/** 400 `invalid_request`, 422 `idempotency_key_reused`. */
+/** 400 `invalid_request`, `invalid_nickname`; 422 `idempotency_key_reused`, `chat_message_not_allowed`. */
 export class BadRequestError extends APIError {}
-/** 401 `unauthorized`: missing or wrong API key. */
+/** 401 `unauthorized` (missing or wrong API key), `invalid_session` (a viewer session on public chat calls). */
 export class AuthenticationError extends APIError {}
 /** 402 `insufficient_credit`: less than $1.00 of credit left. */
 export class InsufficientCreditError extends APIError {}
@@ -59,9 +59,9 @@ export class InsufficientCreditError extends APIError {}
 export class PermissionDeniedError extends APIError {}
 /** 404 `not_found`. */
 export class NotFoundError extends APIError {}
-/** 409 `stream_not_pending`, `stream_ended`, `recording_not_ready`. */
+/** 409 `stream_not_pending`, `stream_ended`, `recording_not_ready`, `chat_not_enabled`, `chat_closed`, `chat_paused`. */
 export class ConflictError extends APIError {}
-/** 429: an account limit (`limit_*`) or `rate_limited`. */
+/** 429: an account limit (`limit_*`), `rate_limited`, or chat's `chat_slow_mode`, `chat_rate_limited`, `chat_busy` (`details.retry_after_seconds`). */
 export class RateLimitError extends APIError {}
 /** 5xx, including 503 `no_capacity`. */
 export class InternalServerError extends APIError {}

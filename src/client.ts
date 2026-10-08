@@ -1,5 +1,6 @@
 import { Core, type ClientOptions } from './core.js';
 import { Account, UsageResource } from './resources/account.js';
+import { Chat } from './resources/chat.js';
 import { EmbedResource } from './resources/embed.js';
 import { Recordings } from './resources/recordings.js';
 import { Streams } from './resources/streams.js';
@@ -21,6 +22,8 @@ export class JustOnAir {
   readonly usage: UsageResource;
   readonly account: Account;
   readonly embed: EmbedResource;
+  /** Viewer chat and reactions on your streams (beta). */
+  readonly chat: Chat;
 
   constructor(opts: ClientOptions = {}) {
     const core = new Core(opts);
@@ -30,5 +33,6 @@ export class JustOnAir {
     this.usage = new UsageResource(core);
     this.account = new Account(core);
     this.embed = new EmbedResource(core);
+    this.chat = new Chat(core);
   }
 }

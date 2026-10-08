@@ -378,6 +378,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/embed/{id}/thumbnail.jpg": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Public thumbnail
+         * @description No key needed. Only while the stream has `thumbnail.public` on. Redirects (302) to the newest frame, or to the JustOnAir placeholder before the first one, so an `<img>` always shows something. Cached for 30 s. Use it as `https://play.joacdn.com/api/embed/{id}/thumbnail.jpg` (that is `thumbnail.public_url`).
+         */
+        get: operations["getPublicThumbnail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/embed/{id}/beat": {
         parameters: {
             query?: never;
@@ -392,9 +415,272 @@ export interface paths {
         put?: never;
         /**
          * Report a viewer (sampled)
-         * @description Sent by the hosted player, or by your own player to be counted live. Draw `u` once per page load; report every `beacon.interval_seconds` while `u` is below `beacon.rate` from the embed read. No body, so `navigator.sendBeacon(url)` works from any page.
+         * @description Sent by the hosted player, or by your own player to be counted live. Get a viewer session once per page load (its `u` is your draw); report every `beacon.interval_seconds` while `u` is below `beacon.rate` from the embed read. No body, so `navigator.sendBeacon(url)` works from any page.
          */
         post: operations["viewerBeat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get a viewer session
+         * @description Once per browser and stream; keep it until `expires_at`. Any stream whose hosted player is on. No body.
+         */
+        post: operations["createViewerSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Read the chat
+         * @description The same answer for every viewer for 2 s, so a whole audience costs one read per stream every 2 s. Use the CDN address `https://play.joacdn.com/api/embed/{id}/chat` from browsers. Keep the messages you show, add new ids, remove `deleted_ids` and everything up to `cleared_at`.
+         */
+        get: operations["getChat"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/chat/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post a message
+         * @description Straight to `https://api.justonair.com`, never through the CDN. Show the viewer their own message at once and confirm it when it appears in the read. A banned viewer, or a message caught by the word filter, gets the same 201: it is stored for the owner and shown only to its sender.
+         */
+        post: operations["postChatMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/chat/reactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send reactions
+         * @description Count clicks in the browser and send them at most every `reaction_sampling.interval_seconds`, only while your session's `u` is below `reaction_sampling.rate`. No body: `navigator.sendBeacon(url)` works without a CORS preflight. Always 204 once valid; batches over a limit are dropped quietly.
+         */
+        post: operations["sendReactions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Read the chat feed
+         * @description Every message after a cursor, including deleted, filtered and shadow-banned ones with what we know about the sender (never the IP), plus the live state and reaction totals.
+         */
+        get: operations["getChatFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Slow mode, pause, pin
+         * @description Reaches viewers within about 2 s. To turn chat or reactions on or off, change `chat` on the stream.
+         */
+        patch: operations["updateChatState"];
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post as host or moderator
+         * @description Shown with a Host or Moderator badge viewers cannot fake. Links are allowed. Works while chat is paused.
+         */
+        post: operations["postChatAsOwner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Message id (`msg_…`). */
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a message
+         * @description Hidden from everyone within about 2 s. Kept in your feed with `deleted_at`.
+         */
+        delete: operations["deleteChatMessage"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/clear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Clear the chat
+         * @description Hides every message posted so far, and the pin. Your feed keeps them (`cleared: true`).
+         */
+        post: operations["clearChat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/bans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * List bans
+         * @description The bans that apply to this stream: its own, or its moderation group's.
+         */
+        get: operations["listChatBans"];
+        put?: never;
+        /**
+         * Ban a viewer
+         * @description Bans the viewer's session and their address, so a new browser on the same network stays banned. Banned viewers are shadow-banned: their messages look sent to them and nobody else sees them. Scope: the moderation group when the stream has one, else this stream.
+         */
+        post: operations["banChatViewer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/bans/{ban_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Ban id (`ban_…`). */
+                ban_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Lift a ban */
+        delete: operations["unbanChatViewer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/words": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** Get your word list */
+        get: operations["getChatWords"];
+        /**
+         * Replace your word list
+         * @description Words and phrases, matched as whole words in any case. Messages that contain one are stored and shown only to you. Shared by the moderation group when the stream has one.
+         */
+        put: operations["setChatWords"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -997,6 +1283,8 @@ export interface components {
         };
         /** @description How the hosted player presents the stream. On PATCH, a field left out is unchanged and null clears it. */
         PlayerSettings: {
+            /** @description Whether the hosted player plays this stream. Default true. The embed read behind `embed_url` is public: while this is on, anyone who knows the stream id can get a playback URL valid for the whole broadcast. Turn it off when you control access yourself with short-lived playback tokens (paywalls, members-only); the watch page then shows the stream as unavailable. */
+            enabled?: boolean;
             /** @description Show the stream name to viewers on the hosted player. Default true. False keeps the name out of the public embed read entirely. */
             show_name?: boolean;
             /**
@@ -1011,6 +1299,43 @@ export interface components {
              * @description Read only. When the watch-time budget ran out and the watch page closed; null while open.
              */
             readonly closed_at?: string | null;
+        };
+        /** @description The thumbnail setting. See [Thumbnails](/thumbnails). */
+        ThumbnailSettings: {
+            /** @description Default false. True: the hosted player shows the newest frame as its poster, and `thumbnail.public_url` serves it to anyone with the stream id (link previews, your own stream lists). Leave it off for private streams. */
+            public: boolean;
+        };
+        /** @description Viewer chat and reactions (beta). See [Chat and reactions](/chat). On PATCH, a field left out is unchanged. */
+        ChatSettings: {
+            /** @description Viewer chat on this stream: in the hosted player, on the hosted chat page and through the public chat endpoints. Default false. Off whenever `player.enabled` is false. */
+            enabled?: boolean;
+            /** @description Emoji reactions. Default false. */
+            reactions?: boolean;
+            /** @description Bans and your word list apply to every stream of your account with the same key, e.g. one per host. 1–64 characters: letters, digits and `_ . : @ -`. Null (default): this stream only. */
+            moderation_group?: string | null;
+            /** @description The name on your own posts when a post gives none. Up to 40 characters. Default null ("Host"). */
+            host_name?: string | null;
+            /** @description Keep the chat visible, read-only, on the watch page after the stream ends (until it is deleted 30 days later). Default false: hidden from viewers 10 minutes after the end; you keep it. */
+            visible_after_end?: boolean;
+            /** @description The built-in Turkish and English word filter. Default true. Your own words (`/chat/words`) apply either way. */
+            builtin_word_filter?: boolean;
+        };
+        /** @description A frame taken once a minute while the stream is live (the first about 10 s in). Kept with the recording and deleted with it. See [Thumbnails](/thumbnails). */
+        Thumbnail: {
+            /** @description Whether the frame is public (the setting). */
+            public: boolean;
+            /** @description For you: a signed link to the newest frame, a JPEG up to 640 px wide. Valid about an hour; the same link for ten minutes at a time, so browsers can cache it. Null before the first frame and once deleted. */
+            url: string | null;
+            /**
+             * Format: date-time
+             * @description When `url` was taken.
+             */
+            captured_at: string | null;
+            /**
+             * @description While `public` is true: a stable address anyone may load, redirecting to the newest frame (or a placeholder before the first). Null while not public.
+             * @example https://play.joacdn.com/api/embed/str_e1bzk3dxw9z9allei6n7/thumbnail.jpg
+             */
+            public_url: string | null;
         };
         /** @description What the ingest node last measured arriving. Null until the first measurement. */
         Ingest: {
@@ -1394,6 +1719,8 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             player: components["schemas"]["PlayerSettings"];
+            thumbnail: components["schemas"]["Thumbnail"];
+            chat: components["schemas"]["ChatSettings"];
             /**
              * Format: date-time
              * @description While pending: when the reserved slot is released and the stream expires.
@@ -1454,6 +1781,8 @@ export interface components {
                 [key: string]: unknown;
             };
             player?: components["schemas"]["PlayerSettings"];
+            thumbnail?: components["schemas"]["ThumbnailSettings"];
+            chat?: components["schemas"]["ChatSettings"];
         };
         /** @description Only these fields can change, in any status. Null clears a field; `metadata` is replaced whole. */
         UpdateStreamRequest: {
@@ -1463,6 +1792,8 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             player?: components["schemas"]["PlayerSettings"];
+            thumbnail?: components["schemas"]["ThumbnailSettings"];
+            chat?: components["schemas"]["ChatSettings"];
         };
         PlaybackToken: {
             /**
@@ -1534,6 +1865,250 @@ export interface components {
                 rate: number;
                 interval_seconds: number;
             } | null;
+            /** @description The newest frame, when the owner made thumbnails public (`thumbnail.public`). Null otherwise, before the first frame, and while the hosted player is off. */
+            poster_url: string | null;
+            /** @description Whether to load chat at all. Null when chat is off for this stream. The messages come from `GET /v1/embed/{id}/chat`. */
+            chat: {
+                /** @description Always true when the block is there. */
+                enabled: boolean;
+                /** @description Reactions are taken right now. */
+                reactions: boolean;
+                state: components["schemas"]["ChatState"];
+            } | null;
+        };
+        /**
+         * @description `open`: viewers post and react. `paused`: messages visible, only the owner posts. `read_only`: after the end, kept visible by the owner. `closed`: not open (yet, or any more), nothing shown. `off`: chat is off for this stream.
+         * @enum {string}
+         */
+        ChatState: "open" | "paused" | "read_only" | "closed" | "off";
+        /** @description A viewer session signed by JustOnAir. Needed to post and react; also accepted by viewer beats. Keep it per browser and stream (e.g. in localStorage) until it expires. */
+        ViewerSession: {
+            /**
+             * @description Always `viewer_session`.
+             * @constant
+             */
+            object: "viewer_session";
+            /** @description Send as `token` (posts) or `t` (reactions, beats). Scoped to this stream. */
+            token: string;
+            /**
+             * @description The session as moderators see it.
+             * @example vsn_k2m9x0q4b7c1d8e3
+             */
+            session_id: string;
+            /** @description This session's sampling number, 0 ≤ u < 1, drawn by the server. Send reaction batches only while u is below `reaction_sampling.rate`. */
+            u: number;
+            /**
+             * Format: date-time
+             * @description 24 hours after it was issued.
+             */
+            expires_at: string;
+        };
+        /** @description A message as every viewer sees it. Always plain text: escape it, never render it as HTML. */
+        ChatMessage: {
+            /** @description `chat_message` when returned on its own; absent inside lists. */
+            object?: string;
+            /**
+             * @description Message id.
+             * @example msg_3k9x0a7q2m4b8c1d5e6f
+             */
+            id: string;
+            /** @description The sender's nickname, or the owner's display name. */
+            nickname: string;
+            /** @description 1–200 characters. */
+            text: string;
+            /**
+             * @description Set only on the owner's posts: show a Host or Moderator badge. A viewer can never set it, whatever their nickname.
+             * @enum {string|null}
+             */
+            role: "host" | "moderator" | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        /** @description The public chat read: the same answer for every viewer for 2 s. Poll it every `poll_after_seconds`. */
+        ChatRead: {
+            /**
+             * @description Always `chat`.
+             * @constant
+             */
+            object: "chat";
+            /**
+             * @description Stream id. Also the folder of its video on the CDN.
+             * @example str_e1bzk3dxw9z9allei6n7
+             */
+            stream_id: string;
+            state: components["schemas"]["ChatState"];
+            /** @description Seconds a viewer must wait between messages (the owner's slow mode, or automatic slow mode under heavy traffic). 0: off, though every viewer still waits 3 s. */
+            slow_mode_seconds: number;
+            /** @description Slow mode was raised automatically because chat is very busy. */
+            slow_mode_auto: boolean;
+            /** @description The last 50 visible messages, oldest first. */
+            messages: components["schemas"]["ChatMessage"][];
+            /** @description Messages deleted in the last 5 minutes: remove them if you show them. */
+            deleted_ids: string[];
+            /**
+             * Format: date-time
+             * @description The owner cleared the chat: remove every message created at or before this.
+             */
+            cleared_at: string | null;
+            /** @description The pinned message, shown above the chat. */
+            pinned: components["schemas"]["ChatMessage"] | null;
+            /** @description Show the reaction bar. */
+            reactions_enabled: boolean;
+            /** @description Reactions since the previous read, per emoji (estimated under load). Play them as a burst. Keys: `heart` ❤️ `clap` 👏 `laugh` 😂 `fire` 🔥 `party` 🎉 `wow` 😮. */
+            reactions: {
+                [key: string]: number;
+            };
+            /** @description Send reaction batches only while your session's `u` is below `rate`, at most every `interval_seconds`. Null while reactions are off. */
+            reaction_sampling: {
+                rate: number;
+                interval_seconds: number;
+            } | null;
+            /** @description 2 while open or paused; longer otherwise. */
+            poll_after_seconds: number;
+        };
+        /** @description A message as the owner sees it: everything, including what viewers never see and why. Never the viewer's IP address. */
+        ChatOwnerMessage: {
+            /** @description `chat_message` when returned on its own; absent inside lists. */
+            object?: string;
+            /**
+             * @description Message id.
+             * @example msg_3k9x0a7q2m4b8c1d5e6f
+             */
+            id: string;
+            /** @description The sender's nickname, or the owner's display name. */
+            nickname: string;
+            /** @description 1–200 characters. */
+            text: string;
+            /**
+             * @description Set only on the owner's posts: show a Host or Moderator badge. A viewer can never set it, whatever their nickname.
+             * @enum {string|null}
+             */
+            role: "host" | "moderator" | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description Position in this stream's chat, from 1. The feed's cursor. */
+            seq: number;
+            /** @description The viewer session (ban by it). Null on your own posts. */
+            session_id: string | null;
+            /** @description 6 characters derived from the viewer's address: the same fingerprint under a new nickname is probably the same person. */
+            fingerprint: string | null;
+            /** @description The viewer's network, never the address: IPv4 /24 (`85.105.12.0/24`) or IPv6 /48. */
+            network: string | null;
+            /** @description ISO country code, best effort (DB-IP Lite). Null when unknown. */
+            country: string | null;
+            /** @description The viewer's network operator (ISP, mobile carrier, hosting or VPN provider), best effort. Null when unknown. */
+            asn: string | null;
+            /**
+             * Format: date-time
+             * @description When it was deleted.
+             */
+            deleted_at: string | null;
+            /** @description Hit the word filter: stored, never shown to viewers. */
+            filtered: boolean;
+            /** @description Sent by a banned viewer: shown only in their own player. */
+            shadow: boolean;
+            /** @description Posted before the last clear. */
+            cleared: boolean;
+            /** @description Viewers see it. */
+            visible: boolean;
+        };
+        /** @description The owner's chat feed. Poll with `after` = the previous `next_after` (every 1–2 s while live is fine). */
+        ChatFeed: {
+            /**
+             * @description Always `chat_feed`.
+             * @constant
+             */
+            object: "chat_feed";
+            /**
+             * @description Stream id. Also the folder of its video on the CDN.
+             * @example str_e1bzk3dxw9z9allei6n7
+             */
+            stream_id: string;
+            state: components["schemas"]["ChatState"];
+            /** @description Your slow mode. */
+            slow_mode_seconds: number;
+            /** @description What viewers get: yours, or automatic slow mode when that is higher. */
+            effective_slow_mode_seconds: number;
+            /** @description Automatic slow mode is in force. */
+            slow_mode_auto: boolean;
+            paused: boolean;
+            pinned_message_id: string | null;
+            /** Format: date-time */
+            cleared_at: string | null;
+            moderation_group: string | null;
+            /** @description Chat hit its hard limit within the last minute: some posts got `chat_busy`. */
+            busy: boolean;
+            /** @description Messages after `after`, oldest first. */
+            messages: components["schemas"]["ChatOwnerMessage"][];
+            /** @description Deleted in the last 5 minutes, including messages from before `after`. */
+            deleted_ids: string[];
+            /** @description Pass as `after` next time. */
+            next_after: number;
+            /** @description More messages after this page: ask again at once. */
+            has_more: boolean;
+            reactions: {
+                /** @description Per emoji, the last 10 s (estimated under load). */
+                recent: {
+                    [key: string]: number;
+                };
+                /** @description Per emoji, since the start. */
+                total: {
+                    [key: string]: number;
+                };
+            };
+            totals: {
+                /** @description Every message, shown or not. */
+                messages_posted: number;
+                /** @description Messages viewers saw. */
+                messages_shown: number;
+            };
+        };
+        ChatBan: {
+            /**
+             * @description Always `chat_ban`.
+             * @constant
+             */
+            object: "chat_ban";
+            /** @example ban_x8k2m0q4b7c1d8e3a9f5 */
+            id: string;
+            /**
+             * @description `stream`, or `group` when the stream has a `chat.moderation_group`.
+             * @enum {string}
+             */
+            scope: "stream" | "group";
+            moderation_group: string | null;
+            session_id: string | null;
+            fingerprint: string | null;
+            /** @description Their nickname when banned. */
+            nickname: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ChatBanList: {
+            /**
+             * @description Always `list`.
+             * @constant
+             */
+            object: "list";
+            data: components["schemas"]["ChatBan"][];
+            has_more: boolean;
+        };
+        ChatWords: {
+            /**
+             * @description Always `chat_words`.
+             * @constant
+             */
+            object: "chat_words";
+            /**
+             * @description `group` when the stream has a moderation group (the list is shared), else `stream`.
+             * @enum {string}
+             */
+            scope: "stream" | "group";
+            moderation_group: string | null;
+            /** @description Your words and phrases. Whole words, any case. */
+            words: string[];
+            /** @description Whether the built-in list also applies (`chat.builtin_word_filter`). */
+            builtin_word_filter: boolean;
         };
         /** @description Which emails the account gets before its credit runs out. Webhooks are not affected: each endpoint gets the events it subscribes to. */
         NotificationSettings: {
@@ -2748,15 +3323,57 @@ export interface operations {
             };
         };
     };
+    getPublicThumbnail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description To the newest frame (a signed CDN link) or the placeholder. */
+            302: {
+                headers: {
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown stream, or its thumbnail is not public. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests (`rate_limited`). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     viewerBeat: {
         parameters: {
             query: {
-                /** @description Random id for this page load. */
-                s: string;
+                /** @description A viewer session token (`POST /v1/embed/{id}/session`). Preferred: its session id and server-drawn `u` are used, so neither can be forged. Without it, send `s` and `u`. */
+                t?: string;
+                /** @description Without `t`: a random id for this page load. */
+                s?: string;
                 /** @description Waiting, playing, paused or buffering. */
                 st: "w" | "p" | "z" | "b";
-                /** @description The random draw, 0 ≤ u < 1. */
-                u: number;
+                /** @description Without `t`: the random draw, 0 ≤ u < 1. With `t`, use the session's `u`. */
+                u?: number;
             };
             header?: never;
             path: {
@@ -2783,6 +3400,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Invalid or expired session token (`invalid_session`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Unknown stream. */
             404: {
                 headers: {
@@ -2794,6 +3420,796 @@ export interface operations {
             };
             /** @description Too many requests (`rate_limited`). */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createViewerSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The session. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewerSession"];
+                };
+            };
+            /** @description Unknown stream, or its hosted player is off. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests (`rate_limited`). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The chat. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatRead"];
+                };
+            };
+            /** @description Unknown stream. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests (`rate_limited`). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The viewer session token. */
+                    token: string;
+                    /** @description 2–24 characters. Links are refused. */
+                    nickname: string;
+                    /** @description 1–200 characters. Links and bare domains are refused. */
+                    text: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Accepted. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            /** @description `invalid_request` (text), `invalid_nickname`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `invalid_session`: get a new session. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_closed` (with `details.state`) or `chat_paused`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_message_not_allowed`: links are not allowed. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_slow_mode`, `chat_rate_limited` or `chat_busy`, with `details.retry_after_seconds`; or `rate_limited`. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    sendReactions: {
+        parameters: {
+            query: {
+                /** @description The viewer session token. */
+                t: string;
+                /** @description Counts per emoji since the last batch, at most 10 each. Emoji: `heart`, `clap`, `laugh`, `fire`, `party`, `wow`. */
+                r: string;
+            };
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Taken (or dropped quietly). */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `invalid_session`. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests (`rate_limited`). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getChatFeed: {
+        parameters: {
+            query?: {
+                /** @description Messages with `seq` above this. Default 0. */
+                after?: number;
+                /** @description Default 100. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The feed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFeed"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateChatState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description 0–300. 0: off. */
+                    slow_mode_seconds?: number;
+                    /** @description Nobody but you can post. */
+                    paused?: boolean;
+                    /** @description A visible message to pin; null unpins. */
+                    pinned_message_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The feed header (no messages). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFeed"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postChatAsOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description 1–200 characters. */
+                    text: string;
+                    /**
+                     * @description Default `host`.
+                     * @enum {string}
+                     */
+                    role?: "host" | "moderator";
+                    /** @description Up to 40 characters. Default: `chat.host_name`, else "Host" or "Moderator". */
+                    display_name?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The message. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatOwnerMessage"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_closed`, `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Message id (`msg_…`). */
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The message. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatOwnerMessage"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream or message (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    clearChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The feed header. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatFeed"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listChatBans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The bans, newest first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatBanList"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    banChatViewer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description One of their messages. Send this or `session_id`. */
+                    message_id?: string;
+                    /** @description Their session. */
+                    session_id?: string;
+                    /** @description Also delete every message they posted on this stream. Default false. */
+                    delete_messages?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The ban (an existing one if they were already banned). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatBan"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    unbanChatViewer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Ban id (`ban_…`). */
+                ban_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lifted: `{ "object": "chat_ban", "id": "ban_…", "deleted": true }`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such ban for this stream (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getChatWords: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatWords"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    setChatWords: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    words: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatWords"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

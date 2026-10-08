@@ -131,6 +131,34 @@ joa.embed.iframe(stream.embed_url, { title: 'Town hall' }); // the <iframe> snip
 await joa.embed.get(stream.id); // the player's public read; needs no API key
 ```
 
+## Chat and reactions (beta)
+
+Turn chat on per stream, then read and moderate it from your server. Details: [Chat and reactions](https://docs.justonair.com/chat).
+
+```ts
+const stream = await joa.streams.create({ name: 'Friday show', chat: { enabled: true, reactions: true } });
+
+// Every message once, oldest first, polling the feed (deleted, filtered and shadow-banned ones too).
+for await (const m of joa.chat.watch(stream.id)) {
+  console.log(m.nickname, m.text, m.country, m.visible ? '' : '(hidden)');
+  if (/buy followers/i.test(m.text)) await joa.chat.ban(stream.id, { message_id: m.id, delete_messages: true });
+}
+
+await joa.chat.post(stream.id, { text: 'Welcome!' });            // with the Host badge
+await joa.chat.update(stream.id, { slow_mode_seconds: 10 });     // also paused, pinned_message_id
+await joa.chat.setWords(stream.id, ['spoiler']);
+```
+
+Building your own chat UI? The public calls need no API key and work in a browser (`new JustOnAir()` without a key):
+
+```ts
+const viewer = new JustOnAir();
+const session = await viewer.embed.session(streamId);              // once per browser and stream
+await viewer.embed.postMessage(streamId, { token: session.token, nickname: 'Ayşe', text: 'Merhaba!' });
+const chat = await viewer.embed.chat(streamId);                    // or poll https://play.joacdn.com/api/embed/{id}/chat
+await viewer.embed.react(streamId, session.token, { heart: 3 });   // batched; see reaction_sampling
+```
+
 ## Errors
 
 Every error is a `JustOnAirError`. When the API answers with an error you get an `APIError` subclass with the API's stable `code`: program against the code, show the `message` to people.
