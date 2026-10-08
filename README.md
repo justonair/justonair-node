@@ -165,6 +165,8 @@ const chat = await viewer.embed.chat(streamId);                    // or poll ht
 await viewer.embed.react(streamId, session.token, { heart: 3 });   // batched; see reaction_sampling
 ```
 
+To float reactions over your own video player (Video.js, hls.js, Shaka, Plyr, a YouTube iframe), see [Reactions over your own player](https://docs.justonair.com/chat#reactions-over-your-own-player): a copy-paste script that takes your player's element or a selector such as `'.video-wrapper'`.
+
 ## Errors
 
 Every error is a `JustOnAirError`. When the API answers with an error you get an `APIError` subclass with the API's stable `code`: program against the code, show the `message` to people.
