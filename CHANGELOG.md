@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 (2026-10-08)
+
+Chat moderators: `chat.inviteModerator` (a single-use link), `chat.listModerators`, `chat.removeModerator`. `player.allowed_domains` on streams (the sites allowed to embed the player and chat, and to post to chat). Chat messages and bans say who acted (`deleted_by`, `created_by`, owner or moderator). Types regenerated from the OpenAPI spec.
+
 ## 0.2.0 (2026-10-08)
 
 Viewer chat and reactions (beta): `joa.chat` with `feed`, `watch` (an async iterator over new messages), `post` (Host or Moderator badge), `deleteMessage`, `update` (slow mode, pause, pin), `clear`, `ban`, `unban`, `listBans`, `getWords`, `setWords`; `chat` settings on `streams.create` and `streams.update`. Public calls for your own chat UI, no key needed: `embed.session`, `embed.chat`, `embed.postMessage`, `embed.react`. Types regenerated from the OpenAPI spec, which also brings the thumbnail settings (`thumbnail` on streams, `poster_url` on the embed read).

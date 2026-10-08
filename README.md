@@ -147,6 +147,12 @@ for await (const m of joa.chat.watch(stream.id)) {
 await joa.chat.post(stream.id, { text: 'Welcome!' });            // with the Host badge
 await joa.chat.update(stream.id, { slow_mode_seconds: 10 });     // also paused, pinned_message_id
 await joa.chat.setWords(stream.id, ['spoiler']);
+
+// Someone else moderates from the chat page, with no API key: send them the link (works once).
+const { invite_url } = await joa.chat.inviteModerator(stream.id, 'Mert');
+
+// Only your sites may embed the player and chat, or post to it.
+await joa.streams.update(stream.id, { player: { allowed_domains: ['example.com', '*.example.com'] } });
 ```
 
 Building your own chat UI? The public calls need no API key and work in a browser (`new JustOnAir()` without a key):

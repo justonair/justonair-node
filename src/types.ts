@@ -26,6 +26,8 @@ export type ChatFeed = Schemas['ChatFeed'];
 export type ChatBan = Schemas['ChatBan'];
 export type ChatBanList = Schemas['ChatBanList'];
 export type ChatWords = Schemas['ChatWords'];
+export type ChatModerator = Schemas['ChatModerator'];
+export type ChatModeratorList = Schemas['ChatModeratorList'];
 /** The reaction emoji: ❤️ 👏 😂 🔥 🎉 😮. */
 export type Reaction = 'heart' | 'clap' | 'laugh' | 'fire' | 'party' | 'wow';
 export type ReactionCounts = Partial<Record<Reaction, number>>;

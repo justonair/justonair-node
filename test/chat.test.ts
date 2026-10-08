@@ -123,6 +123,25 @@ describe('chat (owner)', () => {
     ]);
   });
 
+  it('moderators: invite, list, remove', async () => {
+    const mod = { object: 'chat_moderator', id: 'mod_1', name: 'Mert', scope: 'stream', moderation_group: null, status: 'invited', invite_expires_at: '2026-10-15T12:00:00.000Z', redeemed_at: null, revoked_at: null, last_seen_at: null, created_at: '2026-10-08T12:00:00.000Z' };
+    const { fetch, calls } = mockFetch(
+      json(201, { ...mod, invite_url: `https://play.joacdn.com/${ID}/chat#mod=inv_x` }),
+      json(200, { object: 'list', data: [mod], has_more: false }),
+      json(200, { ...mod, status: 'revoked' }),
+    );
+    const joa = new JustOnAir({ apiKey: KEY, fetch });
+    expect((await joa.chat.inviteModerator(ID, 'Mert')).invite_url).toContain('#mod=');
+    expect((await joa.chat.listModerators(ID)).data[0]!.name).toBe('Mert');
+    expect((await joa.chat.removeModerator(ID, 'mod_1')).status).toBe('revoked');
+    expect(calls.map((c) => `${c.method} ${c.url.pathname}`)).toEqual([
+      `POST /v1/streams/${ID}/chat/moderators`,
+      `GET /v1/streams/${ID}/chat/moderators`,
+      `DELETE /v1/streams/${ID}/chat/moderators/mod_1`,
+    ]);
+    expect(calls[0]!.body).toEqual({ name: 'Mert' });
+  });
+
   it('chat_not_enabled is a ConflictError', async () => {
     const { fetch } = mockFetch(apiError(409, 'chat_not_enabled', 'Chat was never turned on'));
     const joa = new JustOnAir({ apiKey: KEY, fetch });

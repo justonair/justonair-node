@@ -5,6 +5,8 @@ import type {
   ChatBanParams,
   ChatFeed,
   ChatFeedParams,
+  ChatModerator,
+  ChatModeratorList,
   ChatOwnerMessage,
   ChatPostParams,
   ChatStateParams,
@@ -100,6 +102,24 @@ export class Chat {
   /** Your word list (the moderation group's, when the stream has one). */
   getWords(streamId: string, opts?: RequestOptions): Promise<ChatWords> {
     return this.core.request({ method: 'GET', path: `/v1/streams/${seg(streamId)}/chat/words` }, opts);
+  }
+
+  /**
+   * Invite a moderator: the answer's `invite_url` (shown only now) works once.
+   * Whoever opens it moderates from the hosted chat page with a Moderator
+   * badge: delete, ban, pin, slow mode, pause. No API key reaches them.
+   */
+  inviteModerator(streamId: string, name: string, opts?: RequestOptions): Promise<ChatModerator> {
+    return this.core.request({ method: 'POST', path: `/v1/streams/${seg(streamId)}/chat/moderators`, body: { name } }, opts);
+  }
+
+  listModerators(streamId: string, opts?: RequestOptions): Promise<ChatModeratorList> {
+    return this.core.request({ method: 'GET', path: `/v1/streams/${seg(streamId)}/chat/moderators` }, opts);
+  }
+
+  /** Their link and session stop working at once. */
+  removeModerator(streamId: string, moderatorId: string, opts?: RequestOptions): Promise<ChatModerator> {
+    return this.core.request({ method: 'DELETE', path: `/v1/streams/${seg(streamId)}/chat/moderators/${seg(moderatorId)}` }, opts);
   }
 
   /** Replace your word list: words and phrases, whole words, any case. Up to 500. */

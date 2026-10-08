@@ -687,6 +687,205 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/streams/{id}/chat/moderators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** List moderators */
+        get: operations["listChatModerators"];
+        put?: never;
+        /**
+         * Invite a moderator
+         * @description One link per person. It works once and expires after 7 days unused. With a moderation group, they moderate every stream of the group.
+         */
+        post: operations["createChatModerator"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/streams/{id}/chat/moderators/{moderator_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Moderator id (`mod_…`). */
+                moderator_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove a moderator
+         * @description Their link and session stop working at once (within 5 s).
+         */
+        delete: operations["revokeChatModerator"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/moderator": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open a moderator link
+         * @description The chat page does this when opened with `#mod=…`. Works once.
+         */
+        post: operations["redeemModeratorLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/mod": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Who am I here
+         * @description Whether this moderator session moderates this stream.
+         */
+        get: operations["getModerator"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Slow mode, pause, pin (moderator) */
+        patch: operations["moderatorUpdateChat"];
+        trace?: never;
+    };
+    "/v1/embed/{id}/mod/messages": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post as moderator
+         * @description With the Moderator badge and their name. Works while paused.
+         */
+        post: operations["moderatorPost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/mod/messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Message id (`msg_…`). */
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a message (moderator) */
+        delete: operations["moderatorDelete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/mod/bans": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** List bans (moderator) */
+        get: operations["moderatorListBans"];
+        put?: never;
+        /** Ban a viewer (moderator) */
+        post: operations["moderatorBan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/embed/{id}/mod/bans/{ban_id}": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Ban id (`ban_…`). */
+                ban_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Lift a ban (moderator) */
+        delete: operations["moderatorUnban"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export interface webhooks {
     "stream.live": {
@@ -1299,6 +1498,8 @@ export interface components {
              * @description Read only. When the watch-time budget ran out and the watch page closed; null while open.
              */
             readonly closed_at?: string | null;
+            /** @description Sites allowed to embed the hosted player and chat page, and to post to the stream's chat from a browser. `example.com` (that site over https), `*.example.com` (its subdomains), or a full origin with scheme and port for development. Empty (default) or null: anywhere. Browsers refuse to show the player inside any other site; chat refuses posts from other sites. Not a lock on the video: see [Chat and reactions](/chat#allowed-sites). Takes up to a minute to apply. */
+            allowed_domains?: string[] | null;
         };
         /** @description The thumbnail setting. See [Thumbnails](/thumbnails). */
         ThumbnailSettings: {
@@ -2003,6 +2204,16 @@ export interface components {
              * @description When it was deleted.
              */
             deleted_at: string | null;
+            /**
+             * @description Who deleted it: you (API key or dashboard) or a moderator.
+             * @enum {string|null}
+             */
+            deleted_by: "owner" | "moderator" | null;
+            /** @description The moderator, when `deleted_by` is `moderator`. */
+            deleted_by_moderator: {
+                id?: string;
+                name?: string | null;
+            } | null;
             /** @description Hit the word filter: stored, never shown to viewers. */
             filtered: boolean;
             /** @description Sent by a banned viewer: shown only in their own player. */
@@ -2081,6 +2292,16 @@ export interface components {
             fingerprint: string | null;
             /** @description Their nickname when banned. */
             nickname: string | null;
+            /**
+             * @description Who banned: you or a moderator.
+             * @enum {string|null}
+             */
+            created_by: "owner" | "moderator" | null;
+            /** @description The moderator, when `created_by` is `moderator`. */
+            created_by_moderator: {
+                id?: string;
+                name?: string | null;
+            } | null;
             /** Format: date-time */
             created_at: string;
         };
@@ -2092,6 +2313,71 @@ export interface components {
             object: "list";
             data: components["schemas"]["ChatBan"][];
             has_more: boolean;
+        };
+        /** @description Someone you invited to moderate by link. See [Moderators](/chat#moderators). */
+        ChatModerator: {
+            /**
+             * @description Always `chat_moderator`.
+             * @constant
+             */
+            object: "chat_moderator";
+            /** @example mod_3k9x0a7q2m4b8c1d5e6f */
+            id: string;
+            /** @description Shown with the Moderator badge on their posts. */
+            name: string;
+            /**
+             * @description `group` when the stream has a moderation group (they moderate all its streams), else `stream`.
+             * @enum {string}
+             */
+            scope: "stream" | "group";
+            moderation_group: string | null;
+            /**
+             * @description `invited` (link not opened yet), `active`, `expired` (link unused for 7 days) or `revoked`.
+             * @enum {string}
+             */
+            status: "invited" | "active" | "expired" | "revoked";
+            /**
+             * Format: date-time
+             * @description Until the link is opened.
+             */
+            invite_expires_at: string | null;
+            /** Format: date-time */
+            redeemed_at: string | null;
+            /** Format: date-time */
+            revoked_at: string | null;
+            /**
+             * Format: date-time
+             * @description Their last moderation request (to the minute).
+             */
+            last_seen_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description Only in the answer to creating them: the single-use link, `https://play.joacdn.com/{id}/chat#mod=…`. Send it privately; whoever opens it first becomes this moderator. */
+            invite_url?: string;
+        };
+        ChatModeratorList: {
+            /**
+             * @description Always `list`.
+             * @constant
+             */
+            object: "list";
+            data: components["schemas"]["ChatModerator"][];
+            has_more: boolean;
+        };
+        /** @description The moderator session a link turns into. Keep it in the browser; send it as `X-Moderator-Token`. */
+        ModeratorSession: {
+            /**
+             * @description Always `moderator_session`.
+             * @constant
+             */
+            object: "moderator_session";
+            token: string;
+            /**
+             * Format: date-time
+             * @description 30 days after the link was opened; revoking ends it at once.
+             */
+            expires_at: string;
+            moderator: components["schemas"]["ChatModerator"];
         };
         ChatWords: {
             /**
@@ -3450,6 +3736,15 @@ export interface operations {
                     "application/json": components["schemas"]["ViewerSession"];
                 };
             };
+            /** @description A browser on a site not in `player.allowed_domains` (`origin_not_allowed`). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Unknown stream, or its hosted player is off. */
             404: {
                 headers: {
@@ -3561,6 +3856,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description A browser on a site not in `player.allowed_domains` (`origin_not_allowed`). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Unknown stream. */
             404: {
                 headers: {
@@ -3634,6 +3938,15 @@ export interface operations {
             };
             /** @description `invalid_session`. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A browser on a site not in `player.allowed_domains` (`origin_not_allowed`). */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4210,6 +4523,591 @@ export interface operations {
             };
             /** @description `chat_not_enabled`. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listChatModerators: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Newest first; no links. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatModeratorList"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createChatModerator: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Up to 40 characters. */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The moderator, with `invite_url` (shown only now). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatModerator"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such stream in your account (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_not_enabled`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `limit_moderators` (50 per stream or group). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    revokeChatModerator: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Moderator id (`mod_…`). */
+                moderator_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The moderator, `revoked`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatModerator"];
+                };
+            };
+            /** @description Missing or invalid API key (`unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such moderator for this stream (`not_found`). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    redeemModeratorLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The part after `#mod=`. */
+                    invite: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The moderator session. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModeratorSession"];
+                };
+            };
+            /** @description Already used, revoked, expired, or for another stream (`invite_invalid`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `rate_limited`. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getModerator: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The moderator. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatModerator"];
+                };
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderatorUpdateChat: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description 0–300. */
+                    slow_mode_seconds?: number;
+                    paused?: boolean;
+                    /** @description null unpins. */
+                    pinned_message_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description `{ object: "chat_state", state, slow_mode_seconds, paused, pinned_message_id }`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderatorPost: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description 1–200 characters; links allowed. */
+                    text: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The message. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatOwnerMessage"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `chat_closed`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderatorDelete: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Message id (`msg_…`). */
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The message, `deleted_by: moderator`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatOwnerMessage"];
+                };
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderatorListBans: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The bans. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatBanList"];
+                };
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderatorBan: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    message_id?: string;
+                    session_id?: string;
+                    delete_messages?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The ban, `created_by: moderator`. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatBan"];
+                };
+            };
+            /** @description Invalid request (`invalid_request`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderatorUnban: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description The moderator session (from `POST /v1/embed/{id}/moderator`). */
+                "X-Moderator-Token": string;
+            };
+            path: {
+                /** @description Stream id. */
+                id: string;
+                /** @description Ban id (`ban_…`). */
+                ban_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lifted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No valid moderator session for this stream, or the moderator was removed (`moderator_unauthorized`). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown stream or message. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
