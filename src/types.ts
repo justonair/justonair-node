@@ -69,4 +69,5 @@ export type ChatFeedParams = Query<operations['getChatFeed']>;
 export type ChatPostParams = JsonBody<operations['postChatAsOwner']>;
 export type ChatStateParams = JsonBody<operations['updateChatState']>;
 export type ChatBanParams = JsonBody<operations['banChatViewer']>;
+export type ChatModeratorParams = JsonBody<operations['createChatModerator']>;
 export type ViewerPostParams = JsonBody<operations['postChatMessage']>;

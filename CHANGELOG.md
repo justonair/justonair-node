@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (2026-10-09)
+
+`chat.inviteModerator(id, { name, active_days })`: choose how long a moderator stays one after opening their link (1-30 days, default 30). Moderators carry `active_days` and `active_until`. Passing just a name still works. Types regenerated from the OpenAPI spec.
+
 ## 0.3.0 (2026-10-08)
 
 Chat moderators: `chat.inviteModerator` (a single-use link), `chat.listModerators`, `chat.removeModerator`. `player.allowed_domains` on streams (the sites allowed to embed the player and chat, and to post to chat). Chat messages and bans say who acted (`deleted_by`, `created_by`, owner or moderator). Types regenerated from the OpenAPI spec.

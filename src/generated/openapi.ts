@@ -702,7 +702,7 @@ export interface paths {
         put?: never;
         /**
          * Invite a moderator
-         * @description One link per person. It works once and expires after 7 days unused. With a moderation group, they moderate every stream of the group.
+         * @description One link per person. It works once and expires after 7 days unused. Once opened, they moderate for `active_days`, then invite them again if you want them back. With a moderation group, they moderate every stream of the group.
          */
         post: operations["createChatModerator"];
         delete?: never;
@@ -2332,7 +2332,7 @@ export interface components {
             scope: "stream" | "group";
             moderation_group: string | null;
             /**
-             * @description `invited` (link not opened yet), `active`, `expired` (link unused for 7 days) or `revoked`.
+             * @description `invited` (link not opened yet), `active`, `expired` (link unused for 7 days, or their `active_days` ran out) or `revoked`.
              * @enum {string}
              */
             status: "invited" | "active" | "expired" | "revoked";
@@ -2341,6 +2341,13 @@ export interface components {
              * @description Until the link is opened.
              */
             invite_expires_at: string | null;
+            /** @description How long they moderate after opening the link, 1–30 days (default 30). */
+            active_days: number;
+            /**
+             * Format: date-time
+             * @description When they stop being a moderator: `active_days` after the link was opened. Null until then.
+             */
+            active_until: string | null;
             /** Format: date-time */
             redeemed_at: string | null;
             /** Format: date-time */
@@ -2374,7 +2381,7 @@ export interface components {
             token: string;
             /**
              * Format: date-time
-             * @description 30 days after the link was opened; revoking ends it at once.
+             * @description `active_days` after the link was opened (at most 30 days); revoking ends it at once.
              */
             expires_at: string;
             moderator: components["schemas"]["ChatModerator"];
@@ -4597,6 +4604,8 @@ export interface operations {
                 "application/json": {
                     /** @description Up to 40 characters. */
                     name: string;
+                    /** @description How long they moderate after opening the link: 1–30 days. Default 30. Use 1 for a single show. */
+                    active_days?: number;
                 };
             };
         };

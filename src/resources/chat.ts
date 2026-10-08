@@ -7,6 +7,7 @@ import type {
   ChatFeedParams,
   ChatModerator,
   ChatModeratorList,
+  ChatModeratorParams,
   ChatOwnerMessage,
   ChatPostParams,
   ChatStateParams,
@@ -108,9 +109,12 @@ export class Chat {
    * Invite a moderator: the answer's `invite_url` (shown only now) works once.
    * Whoever opens it moderates from the hosted chat page with a Moderator
    * badge: delete, ban, pin, slow mode, pause. No API key reaches them.
+   * Pass `{ name, active_days }` to choose how long they moderate after
+   * opening it (1-30 days, default 30); then invite them again.
    */
-  inviteModerator(streamId: string, name: string, opts?: RequestOptions): Promise<ChatModerator> {
-    return this.core.request({ method: 'POST', path: `/v1/streams/${seg(streamId)}/chat/moderators`, body: { name } }, opts);
+  inviteModerator(streamId: string, nameOrParams: string | ChatModeratorParams, opts?: RequestOptions): Promise<ChatModerator> {
+    const body = typeof nameOrParams === 'string' ? { name: nameOrParams } : nameOrParams;
+    return this.core.request({ method: 'POST', path: `/v1/streams/${seg(streamId)}/chat/moderators`, body }, opts);
   }
 
   listModerators(streamId: string, opts?: RequestOptions): Promise<ChatModeratorList> {

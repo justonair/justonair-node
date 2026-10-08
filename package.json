@@ -1,6 +1,6 @@
 {
   "name": "justonair",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Official Node.js and TypeScript SDK for the JustOnAir live video API",
   "license": "MIT",
   "author": "JustOnAir <hello@justonair.com>",

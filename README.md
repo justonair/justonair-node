@@ -149,7 +149,7 @@ await joa.chat.update(stream.id, { slow_mode_seconds: 10 });     // also paused,
 await joa.chat.setWords(stream.id, ['spoiler']);
 
 // Someone else moderates from the chat page, with no API key: send them the link (works once).
-const { invite_url } = await joa.chat.inviteModerator(stream.id, 'Mert');
+const { invite_url } = await joa.chat.inviteModerator(stream.id, { name: 'Mert', active_days: 7 });
 
 // Only your sites may embed the player and chat, or post to it.
 await joa.streams.update(stream.id, { player: { allowed_domains: ['example.com', '*.example.com'] } });
